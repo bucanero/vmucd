@@ -1,3 +1,12 @@
+/********************************************************************
+ * VMU Backup CD v1.2.0 (May/2005)
+ * screen.h - coded by El Bucanero
+ *
+ * Copyright (C) 2005 Damian Parrino <bucanero@fibertel.com.ar>
+ * http://www.bucanero.com.ar/
+ *
+ ********************************************************************/
+
 #define VMU_X 510
 #define VMU_Y 210
 #define VMU_RGB 0, 0, 0
@@ -11,10 +20,12 @@
 #define INFO_Y 360
 #define INFO_LINE_LENGTH 72
 #define INFO_RGB 0, 0, 0
+#define ICON_X 30
+#define ICON_Y 360
 #define CREDITS_RGB 1, 1, 1
 
-#define draw_pixel(x,y,color) vram_s[(y)*640+(x)]=(color)
-#define PACK_RGB565(r,g,b) (((r>>3)<<11)|((g>>2)<<5)|((b>>3)<<0))
+#define draw_pixel(x, y, color) vram_s[(y)*640+(x)]=(color)
+#define PACK_RGB565(r, g, b) (((r>>3)<<11)|((g>>2)<<5)|((b>>3)<<0))
 
 //void draw_frame(void);
 void back_init(char *txrfile);
@@ -22,6 +33,8 @@ void font_init(char *gzfile);
 void draw_back(void);
 void draw_char(float x1, float y1, float z1, float a, float r, float g, float b, int c, float xs, float ys);
 void draw_string(float x, float y, float z, float a, float r, float g, float b, char *str, float xs, float ys, int max_len=0);
+void draw_mono_icon(int pos_x, int pos_y, uint8 *icon);
+void draw_color_icon(int pos_x, int pos_y, uint16 *pal, uint8 *icon);
 void splash_screen(char *gzfile, int width, int height);
 void credits_scroll(char *credits_bg, char *original_bg);
 
@@ -187,6 +200,13 @@ void draw_frame(void) {
     draw_string(INFO_X, INFO_Y, 3, 1, INFO_RGB, vmu_info, 1, 1, INFO_LINE_LENGTH);
     pvr_list_finish();
     pvr_scene_finish();
+	if (vmu_icon != NULL) {
+		if (strcmp(vmu_icon->name, "ICONDATA_VMS") == 0) {
+			draw_mono_icon(ICON_X, ICON_Y, vmu_icon->icon);
+		} else {
+			draw_color_icon(ICON_X, ICON_Y, vmu_icon->pal, vmu_icon->icon);
+		}
+	}
 }
 
 void splash_screen(char *gzfile, int width, int height) {
@@ -229,7 +249,7 @@ void credits_scroll(char *credits_bg, char *original_bg) {
 	pvr_mem_free(back_tex);
     back_init(credits_bg);
 //						"1234567890123456789A123456789B123456789C"
-	strcpy(games_lst,	"¬\xFF\xFF\x01          VMU Backup CD v1.1.0\n"
+	strcpy(games_lst,	"¬\xFF\xFF\x01          VMU Backup CD v1.2.0\n"
 						"\n"
 						"        Code & Gfx by El Bucanero\n"
 						"\n"
@@ -251,7 +271,7 @@ void credits_scroll(char *credits_bg, char *original_bg) {
 						"\n"
 						"This soft is FREEWARE - ¬\xFF\x01\x01NOT FOR RESALE!\n"
 						"\n"
-						"¬\xFF\xFF\x01       Released on 18/March/MMV\n"
+						"¬\xFF\xFF\x01       Released on 15/May/MMV\n"
 						"\n\n\n\n\n\n\n\n"
 						"         www.bucanero.com.ar\n");
 	while (y > -880) {
@@ -268,4 +288,35 @@ void credits_scroll(char *credits_bg, char *original_bg) {
 	}
 	pvr_mem_free(back_tex);
     back_init(original_bg);
+}
+
+void draw_mono_icon(int pos_x, int pos_y, uint8 *icon) {
+	int x, y;
+
+	for (y=0; y<32; y++) {
+		for (x=0; x<32; x++) {
+			if (icon[(y*32+x)/8] & (0x80 >> (x&7))) {
+				draw_pixel(pos_x + x, pos_y + y, 0);
+			} else {
+				draw_pixel(pos_x + x, pos_y + y, 0xfff1);
+			}
+		}
+	}
+}
+
+void draw_color_icon(int pos_x, int pos_y, uint16 *pal, uint8 *icon) {
+	int x, y, nyb;
+	uint16 rgb565;
+
+	for (y=0; y<32; y++) {
+		for (x=0; x<32; x+=2) {
+			nyb = (icon[y*16 + x/2] & 0xf0) >> 4;
+			rgb565 = ((((pal[nyb] & 0x0f00)>>8)*2)<<11) + ((((pal[nyb] & 0x00f0)>>4)*4)<<5) + ((((pal[nyb] & 0x000f)>>0)*2)<<0);
+			draw_pixel(pos_x + x, pos_y + y, rgb565);
+
+			nyb = (icon[y*16 + x/2] & 0x0f) >> 0;
+			rgb565 = ((((pal[nyb] & 0x0f00)>>8)*2)<<11) + ((((pal[nyb] & 0x00f0)>>4)*4)<<5) + ((((pal[nyb] & 0x000f)>>0)*2)<<0);
+			draw_pixel(pos_x + x + 1, pos_y + y, rgb565);
+		}
+	}
 }

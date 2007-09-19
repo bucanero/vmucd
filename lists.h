@@ -1,3 +1,12 @@
+/********************************************************************
+ * VMU Backup CD v1.2.0 (May/2005)
+ * lists.h - coded by El Bucanero
+ *
+ * Copyright (C) 2005 Damian Parrino <bucanero@fibertel.com.ar>
+ * http://www.bucanero.com.ar/
+ *
+ ********************************************************************/
+
 typedef struct game_list {
 	char dir[32];
 	char name[64];
@@ -8,6 +17,8 @@ typedef struct save_list {
 	char name[13];
 	char file[13];
 	char desc[256];
+	uint8 icon[512];
+	uint16 pal[16];
 	ssize_t size;
 	struct save_list *next;
 } save_node_t;
@@ -51,6 +62,7 @@ char games_lst[1024];
 char saves_lst[256];
 char vmus_lst[64];
 char vmu_info[384];
+save_node_t* vmu_icon=NULL;
 
 char* get_game_directory(game_node_t *gptr, int pos) {
 	game_node_t *aux=gptr;
@@ -95,7 +107,6 @@ int load_game_list(game_node_t *gptr) {
 	tok=strtok((char *)buf, "=");
 	while (tok != NULL) {
 		strcpy(aux->dir, tok);
-//		_strupr(aux->dir);
 		tok=strtok(NULL, "\n");
 		if (tok != NULL) {
 			strcpy(aux->name, tok);
@@ -126,7 +137,6 @@ int load_save_list(save_node_t *sptr, char *dir) {
 	tok=strtok((char *)buf, "=");
 	while (tok != NULL) {
 		sprintf(tmp, "/cd/%s/%s", dir, tok);
-//		sprintf(tmp, "/cd/%s/%s", dir, _strupr(tok));
 		sprintf(vmu_info, "Loading... %s", tok);
 		draw_frame();
 		tok=strtok(NULL, "\n");
@@ -135,11 +145,23 @@ int load_save_list(save_node_t *sptr, char *dir) {
 			f=fs_open(tmp, O_RDONLY);
 			fs_seek(f, 0x50, SEEK_SET);
 			fs_read(f, tmp, 8);
-			sprintf(aux->file, "%.8s.VMS", tmp);
-//			_strupr(aux->file);
+			tmp[8]=0;
+			sprintf(aux->file, "%s.VMS", tmp);
 			fs_read(f, aux->name, 13);
+			aux->name[12]=0;
 			fs_seek(f, 0x68, SEEK_SET);
 			fs_read(f, &(aux->size), 4);
+			fs_close(f);
+			sprintf(tmp, "/cd/%s/%s", dir, aux->file);
+			f=fs_open(tmp, O_RDONLY);
+			if (strcmp(aux->name, "ICONDATA_VMS") == 0) {
+				fs_seek(f, 0x20, SEEK_SET);
+				fs_read(f, aux->icon, 128);
+			} else {
+				fs_seek(f, 0x60, SEEK_SET);
+				fs_read(f, aux->pal, 32);
+				fs_read(f, aux->icon, 512);
+			}
 			fs_close(f);
 // DEBUG
 //			printf("---%d---\n%s\n%s\n%s\n%d\n", i+1, aux->name, aux->file, aux->desc, aux->size);
