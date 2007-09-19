@@ -373,3 +373,24 @@ unsigned char s3mplay[] = {
 255, 255, 3, 255, 255, 255, 1, 255, 255, 255, 3, 255, 255, 255, 6, 255, 255, 255, 12, 255, 255, 255, 21, 255, 255, 255, 32, 255, 255, 255, 
 44, 255, 255, 255, 59, 255, 255, 255, 76, 255, 255, 255, 95, 255, 255, 255, 115, 255, 255, 255, 136, 255, 255, 255, 159, 255, 255, 255, 182, 255, 
 255, 255, 207, 255, 255, 255, 232, 255, 255, 255, };
+
+volatile unsigned long *snd_dbg=(unsigned long*)0xa080ffc0;
+
+void play_s3m(char *fname) {
+	void *song;
+	ssize_t len;
+	
+	len=fs_load(fname, &song);
+	spu_disable();
+	spu_memload(0x10000, song, len);
+	spu_memload(0, s3mplay, sizeof(s3mplay));
+// DEBUG
+//	printf("Load %s OK, starting ARM\n", fname);
+// DEBUG
+	spu_enable();
+	while (*snd_dbg != 3)
+		;
+	while (*snd_dbg == 3)
+		;
+	free(song);
+}

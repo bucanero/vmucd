@@ -1,11 +1,10 @@
 #
-# Tsunami banner test
-# (c)2002 Dan Potter
-#   -ltsunami -lk++ -lparallax -lpng -ljpeg -lkmg -lkosutils -lz -lm
+# VMU Backup CD Special Edition (Feb/2005)
+# Copyright (C) 2005 Damian Parrino <bucanero@fibertel.com.ar>
+# http://www.bucanero.com.ar/
 
-TARGET = vmutool.elf
-OBJS = vmutool.o
-OBJEXTRA = wfont.o
+TARGET = vmucd.elf
+OBJS = vmucd.o
 
 all: rm-elf $(TARGET)
 
