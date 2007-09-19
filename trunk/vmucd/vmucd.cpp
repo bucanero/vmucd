@@ -1,6 +1,6 @@
 /********************************************************************
- * VMU Backup CD Special Edition (Feb/2005)
- * coded by El Bucanero
+ * VMU Backup CD v1.2.0 (May/2005)
+ * vmucd.cpp - coded by El Bucanero
  *
  * some code based on <kos/examples/dreamcast/png/> from KallistiOS
  *
@@ -8,9 +8,9 @@
  * http://www.bucanero.com.ar/
  *
  * Greetz to:
- * Dan Potter for KallistiOS and other great libs like Tsunami
- * AndrewK / Napalm 2001 for the lovely DC load-ip/tool				<andrewk@napalm-x.com>
- * Lawrence Sebald for the MinGW/msys cross compiler tutorial
+ * Dan Potter for KallistiOS and other great libs like Tsunami		<http://gamedev.allusion.net/>
+ * AndrewK / Napalm 2001 for the lovely DC load-ip/tool				<http://adk.napalm-x.com/>
+ * Lawrence Sebald for the MinGW/msys cross compiler tutorial		<http://ljsdcdev.sunsite.dk/>
  * Dreamcast@PlanetWeb for the whole bunch of DC saves				<http://dreamcast.planetweb.com/>
  * Jeff.Ma for sharing a lot of JAP & other rare saves				<http://www.dreamcastcn.com/>
  *
@@ -155,13 +155,15 @@ void update_lists(interface_t inter) {
 	}
 	strcpy(saves_lst, "");
 	strcpy(vmu_info, "");
+	vmu_icon=NULL;
 	if (saux != NULL) {
 		i=0;
 		while ((saux->next != NULL) && (i < inter.save_pos->top + inter.save_pos->maxpage)) {
 			if (i >= inter.save_pos->top) {
 				if (i == inter.save_pos->pos) {
 					strcat(saves_lst, SELECTED_RGB);
-					sprintf(vmu_info, "File: %s - %d Block(s)\n%s", saux->name, (saux->size / 512), saux->desc);
+					sprintf(vmu_info, "     File: %s - %d Block(s)\n     %s", saux->name, (saux->size / 512), saux->desc);
+					vmu_icon=saux;
 				}
 				strcat(saves_lst, saux->file);
 				strcat(saves_lst, "\n");
@@ -188,12 +190,12 @@ void copy_file(interface_t inter) {
 //		printf("%s\n%s\n", tmpsrc, tmpdst);
 // DEBUG
 		if (fs_copy(tmpsrc, tmpdst) == sptr->size) {
-			sprintf(vmu_info, "%s: %d blocks copied to VMU %c%c.\n", sptr->name, sptr->size/512, vptr->name[0]-32, vptr->name[1]);
+			sprintf(vmu_info, "     %s: %d blocks copied to VMU %c%c.\n", sptr->name, sptr->size/512, vptr->name[0]-32, vptr->name[1]);
 		} else {
-			sprintf(vmu_info, "Copy Error!\n");
+			sprintf(vmu_info, "     Copy Error!\n");
 		}
 	} else {
-		sprintf(vmu_info, "Error! Not enough free blocks.\n");
+		sprintf(vmu_info, "     Error! Not enough free blocks.\n");
 	}
 	timer = timer_ms_gettime64();
 	while (timer + 1500 > timer_ms_gettime64()) {
