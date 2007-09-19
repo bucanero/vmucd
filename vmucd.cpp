@@ -1,8 +1,11 @@
 /********************************************************************
- * VMU Backup CD v1.2.0 (May/2005)
+ * VMU Backup CD v1.3.0 (Aug/2005)
  * vmucd.cpp - coded by El Bucanero
  *
- * some code based on <kos/examples/dreamcast/png/> from KallistiOS
+ * VMU emulator SoftVMS by Marcus Comstedt							<http://mc.pp.se/dc/>
+ * SoftVMS port to KallistiOS by DirtySanchez
+ *
+ * some misc code based on <kos/examples/dreamcast/png/> from KallistiOS
  *
  * Copyright (C) 2005 Damian Parrino <bucanero@fibertel.com.ar>
  * http://www.bucanero.com.ar/
@@ -21,6 +24,7 @@
 #include <kos.h>
 #include <png/png.h>
 #include <zlib/zlib.h>
+#include "prototypes.h"
 #include "lists.h"
 #include "vmu_icon.h"
 #include "buk_icon.h"
@@ -37,6 +41,7 @@
 int file_select(interface_t inter, menu_pos_t *menu);
 void update_lists(interface_t inter);
 void copy_file(interface_t inter);
+void play_vmu_game(interface_t inter);
 
 extern uint8 romdisk[];
 
@@ -94,13 +99,17 @@ int file_select(interface_t inter, menu_pos_t *menu) {
 					inter.saves=NULL;
 				} else {
 					if (inter.vmus == NULL) {
-						inter.vmu_pos->top=0;
-						inter.vmu_pos->pos=0;
-						inter.vmus=(vmu_node_t *)malloc(sizeof(vmu_node_t));
-						inter.vmu_pos->total=load_vmu_list(inter.vmus);
-						file_select(inter, inter.vmu_pos);
-						free_vmu_list(inter.vmus);
-						inter.vmus=NULL;
+						if ((get_save_ptr(inter.saves, inter.save_pos->pos))->vmugame) {
+							play_vmu_game(inter);
+						} else {
+							inter.vmu_pos->top=0;
+							inter.vmu_pos->pos=0;
+							inter.vmus=(vmu_node_t *)malloc(sizeof(vmu_node_t));
+							inter.vmu_pos->total=load_vmu_list(inter.vmus);
+							file_select(inter, inter.vmu_pos);
+							free_vmu_list(inter.vmus);
+							inter.vmus=NULL;
+						}
 					} else {
 						copy_file(inter);
 						done=1;
@@ -123,6 +132,16 @@ int file_select(interface_t inter, menu_pos_t *menu) {
 	}
 	return(menu->pos);
 }
+
+/*			if ((t->buttons & CONT_X) && (timer + 200 < timer_ms_gettime64())) {
+				if (inter.saves != NULL) {
+					if ((get_save_ptr(inter.saves, inter.save_pos->pos))->vmugame) {
+						play_vmu_game(inter);
+					}
+				}
+				timer = timer_ms_gettime64();
+			}
+*/
 
 void update_lists(interface_t inter) {
 	int		i=0;
@@ -202,6 +221,28 @@ void copy_file(interface_t inter) {
 		draw_frame();
 	}
 	vmu_set_icon(vmu_icon_xpm);
+}
+
+void play_vmu_game(interface_t inter) {
+	save_node_t *sptr;
+	char vmsfile[64];
+	char hdr[4];
+	file_t fd;
+
+	sptr=get_save_ptr(inter.saves, inter.save_pos->pos);
+	sprintf(vmsfile, "/cd/%s/%s", get_game_directory(inter.games, inter.game_pos->pos), sptr->file);
+	fd = fs_open(vmsfile, O_RDONLY);
+	fs_read(fd, hdr, 4);
+	fs_close(fd);
+	if(hdr[0]=='L' && hdr[1]=='C' && hdr[2]=='D' && hdr[3]=='i') {
+//		printf("Loading LCD image %s\n", vmsfile);
+		do_lcdimg(vmsfile);
+	} else {
+//		printf("Loading VMS Game %s\n", vmsfile);
+		do_vmsgame(vmsfile, NULL);
+	}
+	vmu_set_icon(vmu_icon_xpm);
+//   halt_mode();
 }
 
 int main(int argc, char **argv) {

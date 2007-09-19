@@ -1,5 +1,5 @@
 /********************************************************************
- * VMU Backup CD v1.2.0 (May/2005)
+ * VMU Backup CD v1.3.0 (Aug/2005)
  * lists.h - coded by El Bucanero
  *
  * Copyright (C) 2005 Damian Parrino <bucanero@fibertel.com.ar>
@@ -17,6 +17,7 @@ typedef struct save_list {
 	char name[13];
 	char file[13];
 	char desc[256];
+	bool vmugame;
 	uint8 icon[512];
 	uint16 pal[16];
 	ssize_t size;
@@ -149,19 +150,25 @@ int load_save_list(save_node_t *sptr, char *dir) {
 			sprintf(aux->file, "%s.VMS", tmp);
 			fs_read(f, aux->name, 13);
 			aux->name[12]=0;
+			fs_seek(f, 0x64, SEEK_SET);
+			fs_read(f, tmp, 1);
+			if (tmp[0] < 0x02) {
+				aux->vmugame=false;
+			} else {
+				aux->vmugame=true;
+			}
 			fs_seek(f, 0x68, SEEK_SET);
 			fs_read(f, &(aux->size), 4);
 			fs_close(f);
 			sprintf(tmp, "/cd/%s/%s", dir, aux->file);
 			f=fs_open(tmp, O_RDONLY);
-			if (strcmp(aux->name, "ICONDATA_VMS") == 0) {
-				fs_seek(f, 0x20, SEEK_SET);
-				fs_read(f, aux->icon, 128);
+			if (aux->vmugame) {
+				fs_seek(f, 0x260, SEEK_SET);
 			} else {
 				fs_seek(f, 0x60, SEEK_SET);
-				fs_read(f, aux->pal, 32);
-				fs_read(f, aux->icon, 512);
 			}
+			fs_read(f, aux->pal, 32);
+			fs_read(f, aux->icon, 512);
 			fs_close(f);
 // DEBUG
 //			printf("---%d---\n%s\n%s\n%s\n%d\n", i+1, aux->name, aux->file, aux->desc, aux->size);
@@ -176,6 +183,16 @@ int load_save_list(save_node_t *sptr, char *dir) {
 	free(buf);
 	return(i);
 }
+
+/*			if (strcmp(aux->name, "ICONDATA_VMS") == 0) {
+				fs_seek(f, 0x20, SEEK_SET);
+				fs_read(f, aux->icon, 128);
+			} else {
+				fs_seek(f, 0x60, SEEK_SET);
+				fs_read(f, aux->pal, 32);
+				fs_read(f, aux->icon, 512);
+			}
+*/
 
 int load_vmu_list(vmu_node_t *vptr) {
 	int i(0);

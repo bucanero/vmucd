@@ -1,5 +1,5 @@
 /********************************************************************
- * VMU Backup CD v1.2.0 (May/2005)
+ * VMU Backup CD v1.3.0 (Aug/2005)
  * screen.h - coded by El Bucanero
  *
  * Copyright (C) 2005 Damian Parrino <bucanero@fibertel.com.ar>
@@ -201,13 +201,16 @@ void draw_frame(void) {
     pvr_list_finish();
     pvr_scene_finish();
 	if (vmu_icon != NULL) {
-		if (strcmp(vmu_icon->name, "ICONDATA_VMS") == 0) {
+		draw_color_icon(ICON_X, ICON_Y, vmu_icon->pal, vmu_icon->icon);
+	}
+}
+
+/*		if (strcmp(vmu_icon->name, "ICONDATA_VMS") == 0) {
 			draw_mono_icon(ICON_X, ICON_Y, vmu_icon->icon);
 		} else {
 			draw_color_icon(ICON_X, ICON_Y, vmu_icon->pal, vmu_icon->icon);
 		}
-	}
-}
+*/
 
 void splash_screen(char *gzfile, int width, int height) {
 	uint8 *buf;
@@ -249,21 +252,26 @@ void credits_scroll(char *credits_bg, char *original_bg) {
 	pvr_mem_free(back_tex);
     back_init(credits_bg);
 //						"1234567890123456789A123456789B123456789C"
-	strcpy(games_lst,	"¬\xFF\xFF\x01          VMU Backup CD v1.2.0\n"
+	strcpy(games_lst,	"¬\xFF\xFF\x01          VMU Backup CD v1.3.0\n"
 						"\n"
-						"        Code & Gfx by El Bucanero\n"
+						"          Coded by El Bucanero\n"
+						"\n"
+						"  SoftVMS emulator by Marcus Comstedt\n"
+						"    KallistiOS port by DirtySanchez\n"
 						"\n"
 						"¬\xFF\x01\x01                Greetz\n"
 						"\n"
 						"PlanetWeb Site (for a lot of saves)\n"
 						"Jeff.Ma (for many rare saves)\n"
-						"Pavlik (for some other saves)\n"
 						"Tommi Uimonen (for the music)\n"
 						"Dan Potter (for KallistiOS)\n"
 						"AndrewK (for DCload-ip & tool)\n"
 						"Lawrence Sebald (for the MinGW guide)\n"
-						"SEGA (for the greatest console!)\n"
-						"Jasc Software (for Paint Shop Pro)\n"
+						"Pavlik (for some other saves)\n"
+						"\n"
+						"           Special thanks to\n"
+						"¬\x04\x81\xC4                 SEGA\n"
+						"    - for the greatest console! -\n"
 						"\n"
 						"  Copyright (C) 2005 - Damian Parrino\n"
 						"\n"
@@ -271,10 +279,10 @@ void credits_scroll(char *credits_bg, char *original_bg) {
 						"\n"
 						"This soft is FREEWARE - ¬\xFF\x01\x01NOT FOR RESALE!\n"
 						"\n"
-						"¬\xFF\xFF\x01       Released on 15/May/MMV\n"
+						"¬\xFF\xFF\x01       Released on 11/Aug/MMV\n"
 						"\n\n\n\n\n\n\n\n"
 						"         www.bucanero.com.ar\n");
-	while (y > -880) {
+	while (y > -1070) {
 	    pvr_wait_ready();
 		pvr_scene_begin();
 	    pvr_list_begin(PVR_LIST_OP_POLY);
