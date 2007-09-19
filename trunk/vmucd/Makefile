@@ -4,7 +4,7 @@
 # http://www.bucanero.com.ar/
 
 TARGET = vmucd.elf
-OBJS = vmucd.o
+OBJS = cpu.o lcdimg.o dc_mainwin.o vmucd.o
 
 all: rm-elf $(TARGET)
 
