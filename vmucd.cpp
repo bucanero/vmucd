@@ -1,7 +1,7 @@
 // $Id$
 /********************************************************************
  * VMU Backup CD v1.3.0 (Aug/2005)
- * vmucd.cpp - coded by El Bucanero
+ * coded by El Bucanero
  *
  * VMU emulator SoftVMS by Marcus Comstedt							<http://mc.pp.se/dc/>
  * SoftVMS port to KallistiOS by DirtySanchez
