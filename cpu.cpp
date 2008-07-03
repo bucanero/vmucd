@@ -1,3 +1,5 @@
+// $Id$
+
 #include <kos.h>
 #include <time.h>
 #include "prototypes.h"
