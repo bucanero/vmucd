@@ -1,3 +1,4 @@
+// $Id$
 
 #define GETTIMEOFDAY(tp) gettimeofday(tp, NULL)
 #define EAGAIN 11
