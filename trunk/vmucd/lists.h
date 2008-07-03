@@ -1,7 +1,7 @@
 // $Id$
 /********************************************************************
  * VMU Backup CD v1.3.0 (Aug/2005)
- * lists.h - coded by El Bucanero
+ * coded by El Bucanero
  *
  * Copyright (C) 2005 Damian Parrino <bucanero@fibertel.com.ar>
  * http://www.bucanero.com.ar/
